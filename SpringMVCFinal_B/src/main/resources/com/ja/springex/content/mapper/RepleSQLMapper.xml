@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ja.springex.content.mapper.RepleSQLMapper">
+	<!-- 
+		<![CDATA[]]>
+	 -->
+	 
+	 <insert id="insert">
+	 	<![CDATA[
+	 		INSERT INTO FB_Reple VALUES (
+		    FB_Reple_seq.nextval,
+		    #{content_no},
+		    #{member_no},
+		    #{reple_content},
+		    SYSDATE
+			)
+	 	]]>
+	 </insert>
+	 
+	 
+	 <select id="selectByContentNo" resultType="com.ja.springex.vo.RepleVo">
+	 	<![CDATA[
+	 		SELECT * FROM FB_Reple WHERE content_no = #{content_no}	
+			ORDER BY reple_no ASC 	
+	 	]]>
+	 </select>
+	 
+	 <!-- 남녀 성비 통계와 관련된 데이터는 ><가들어감 CDATA 꼭 사용/resultType는.한줄에 해당하는 타입을 넣어준다. -->
+	 <select id="selectRatioCount" resultType="map">
+	 	<![CDATA[
+	 		SELECT fm.member_sex as sex,COUNT(fm.member_sex) as ratio_count FROM FB_reple fr,FB_member fm
+			WHERE fr.member_no = fm.member_no
+			AND fr.content_no =#{content_no}
+			GROUP BY fm.member_sex
+	 	]]>
+	 </select>
+	 
+</mapper>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ja.springex.content.mapper.ContentSQLMapper">
+
+	<!-- 
+		<![CDATA[]]>
+	 -->
+
+	<!-- 프라이머리 키 생성 ..듀얼이라는 테이블에서 프라이머리키 따로 뽑아내기-->
+	<select id="creatKey" resultType="int">
+		<![CDATA[
+			SELECT FB_content_seq.nextval FROM Dual
+		]]>
+	</select>
+
+
+ 	<!-- 글쓰기 /nextval 변경 프라이머리키 뜯어냈음으로]-->
+	<insert id="insert">
+		<![CDATA[
+			INSERT INTO FB_content VALUES(
+		    #{content_no},
+		    #{member_no},
+		    #{content_title},
+		    #{content_content},
+		    0,
+		    SYSDATE
+			)
+		]]>
+	</insert>
+	
+	<!-- 글 출력 / 페이징 처리 -->
+	<select id="selectAll" resultType="com.ja.springex.vo.ContentVo">
+		<![CDATA[
+			SELECT c2.* 
+			FROM(
+			    SELECT c1.*,ROWNUM as rnum 
+			    FROM(SELECT * FROM fb_content ORDER BY content_no DESC)c1)c2
+			WHERE c2.rnum >= (#{page_num}-1)*10+1 
+			AND c2.rnum <= #{page_num}*10
+		]]>
+	</select>
+
+	<!-- 글 제목 검색 -->
+	<select id="selectByTitle" resultType="com.ja.springex.vo.ContentVo">
+		<![CDATA[
+			SELECT * FROM fb_content 
+			WHERE content_title LIKE '%' || #{search_word} || '%'
+			ORDER BY content_no DESC
+		]]>
+	</select>
+	
+	<!-- 글 내용 검색 -->
+	<select id="selectByContent" resultType="com.ja.springex.vo.ContentVo">
+		<![CDATA[
+			SELECT * FROM fb_content 
+			WHERE content_content LIKE '%' || #{search_word} || '%'
+			ORDER BY content_no DESC
+		]]>
+	</select>
+
+	<!-- 글 작성자 검색 -->
+	<select id="selectByWriter" resultType="com.ja.springex.vo.ContentVo">
+		<![CDATA[
+			SELECT c.* FROM fb_content c , fb_member m
+			WHERE m.member_no = c.member_no 
+			AND m.member_nick LIKE '%' || #{search_word} || '%'
+			ORDER BY content_no DESC
+		]]>
+	</select>
+
+
+	<!-- 글 보기 -->
+	<select id="selectByNo" resultType="com.ja.springex.vo.ContentVo">
+		<![CDATA[
+			SELECT * FROM fb_content WHERE content_no = #{no}
+		]]>
+	</select>
+
+	<!-- 글 삭제-->
+	<delete id="deleteByNo">
+		<![CDATA[
+			DELETE FROM fb_content WHERE content_no = #{no}
+		]]>
+	</delete>
+
+	<!-- 글 수정 -->
+	<update id="update">
+		<![CDATA[
+			UPDATE fb_content 
+			SET content_title = #{content_title},content_content = #{content_content} 
+			WHERE content_no = #{content_no}
+		]]>
+	</update>
+
+	 <!-- 글 조회수 증가 -->
+	 <update id="increaseReadcount">
+	 	<![CDATA[
+	 		UPDATE fb_content 
+	 		SET content_readcount = content_readcount + 1 
+			WHERE content_no = #{no}
+	 	]]>
+	 </update>
+	 
+	 <!--페이지 갯수 -->
+	 <select id="getPageCount" resultType="int">
+	 	<![CDATA[
+	 		SELECT CEIL(COUNT(*)/10) FROM fb_content
+	 	]]>
+	 </select>
+
+</mapper>
